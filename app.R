@@ -112,7 +112,8 @@ server <- function(input, output, session)  {
 }
 
 ui <- function(request) {
-  fluidPage(#theme = "bootstrap.css",
+  fluidPage(
+    tags$title("Ettevõtete ajaloo võrdlus - Annegrete Peek"),
     mainPanel(width = 12,
               fluidRow(
                 column(8, selectizeInput(width = '100%', "Firma", "", choices = c("Vali ettevõtted" = ""), multiple = TRUE)),
