@@ -20,7 +20,7 @@ parandus <- function(string){
 }
 
 kymne_aste = function(tunnus){
-  max_vaartus = max(tunnus, na.rm = TRUE)
+    max_vaartus = max(abs(tunnus[abs(tunnus)<Inf]), na.rm = TRUE)
   if (max_vaartus > 1e+09) {
     div = 1e+09
     label = "(miljardites)"
