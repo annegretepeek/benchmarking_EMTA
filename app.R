@@ -40,16 +40,6 @@ registrikood_to_url <- function(registrikoodid) {
   paste(registrikoodid, collapse = ",")
 }
 
-parandus <- function(string){
-  string <- gsub("<ff>FFFFC3<ff>FFFF9C", "Ü", string)
-  string <- gsub("<ff>FFFFC3<ff>FFFF95", "Õ", string)
-  string <- gsub("<ff>FFFFC3<ff>FFFF84", "Ä", string)
-  string <- gsub("<ff>FFFFC3<ff>FFFF96", "Ö", string)
-  string <- gsub("<ff>FFFFC5<ff>FFFFA0", "Š", string)
-  string <- gsub("<ff>FFFFC5<ff>FFFFBD", "Ž", string)
-  return(string)
-}
-
 kymne_aste = function(tunnus){
   max_vaartus = max(abs(tunnus[abs(tunnus)<Inf]), na.rm = TRUE)
   if (max_vaartus > 1e+09) {
