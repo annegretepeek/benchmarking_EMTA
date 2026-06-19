@@ -1,0 +1,102 @@
+library(httr)
+library(jsonlite)
+
+# ----------------------------
+# Configuration
+# ----------------------------
+
+owner <- "annegretepeek"
+repo  <- "EMTA_data"
+branch <- "main"
+
+token <- Sys.getenv("GITHUB_PAT")
+
+dest_root <- "data"
+
+# ----------------------------
+# Helpers
+# ----------------------------
+
+github_headers <- add_headers(
+  Authorization = paste("Bearer", token),
+  Accept = "application/vnd.github+json"
+)
+
+download_file <- function(repo_path, dest_file) {
+  
+  raw_url <- paste0(
+    "https://raw.githubusercontent.com/",
+    owner, "/", repo, "/", branch, "/", repo_path
+  )
+  
+  dir.create(dirname(dest_file),
+             recursive = TRUE,
+             showWarnings = FALSE)
+  
+  res <- GET(raw_url, github_headers)
+  
+  stop_for_status(res)
+  
+  writeBin(
+    content(res, "raw"),
+    dest_file
+  )
+  
+  message("Downloaded: ", repo_path)
+}
+download_github_folder <- function(repo_folder, dest_folder) {
+  
+  api_url <- paste0(
+    "https://api.github.com/repos/",
+    owner, "/", repo,
+    "/contents/", repo_folder,
+    "?ref=", branch
+  )
+  
+  res <- GET(api_url, github_headers)
+  stop_for_status(res)
+  
+  files <- fromJSON(
+    content(res, "text", encoding = "UTF-8")
+  )
+  
+  dir.create(dest_folder, recursive = TRUE, showWarnings = FALSE)
+  
+  for (i in seq_len(nrow(files))) {
+    
+    if (files$type[i] == "file" && grepl("\\.parquet$", files$name[i])) {
+      
+      download_file(
+        files$path[i],
+        file.path(dest_folder, files$name[i])
+      )
+      
+    } else if (files$type[i] == "dir") {
+      
+      download_github_folder(
+        files$path[i],
+        file.path(dest_folder, files$name[i])
+      )
+    }
+  }
+}
+
+# ----------------------------
+# Download single file
+# ----------------------------
+
+download_file(
+  "data/apps/active_companies.parquet",
+  file.path(dest_root,
+            "active_companies.parquet")
+)
+
+# ----------------------------
+# Download dataset folders
+# ----------------------------
+
+download_github_folder(
+  "data/apps/emta_compare",
+  file.path(dest_root,
+            "emta_compare")
+)
